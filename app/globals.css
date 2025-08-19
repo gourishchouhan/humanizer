@@ -3,3 +3,55 @@
 body {
   @apply bg-gray-50 text-gray-900;
 }
+
+/* ...existing code... */
+
+:root {
+  --text: #0e1525;
+  --muted: #40536b;
+  --bg: #f7f8fc;
+  --card: rgba(255, 255, 255, 0.7);
+  --surface: #ffffff;
+  --border: rgba(0, 23, 71, 0.12);
+  --accent: #4f6ef7;
+  --button-disabled: #aab4d6;
+
+  /* Light gradient */
+  --bg-gradient: radial-gradient(125% 125% at 50% 10%, #ffffff 40%, #ffe5e5 100%);
+
+  --danger-bg: rgba(255, 0, 0, 0.08);
+  --danger-border: rgba(255, 0, 0, 0.25);
+  --danger-text: #a11919;
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --text: #e6e9f0;
+  --muted: #a7b0c0;
+  --bg: #0b1020;
+  --card: rgba(255, 255, 255, 0.05);
+  --surface: #0f152b;
+  --border: #2a355a;
+  --accent: #4f6ef7;
+  --button-disabled: #39446a;
+
+  /* Crimson Depth gradient */
+  --bg-gradient: radial-gradient(125% 125% at 50% 10%, #000000 40%, #2b0707 100%);
+
+  --danger-bg: rgba(255, 0, 0, 0.08);
+  --danger-border: rgba(255, 0, 0, 0.25);
+  --danger-text: #ffc9c9;
+
+  color-scheme: dark;
+}
+
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+
+* {
+  box-sizing: border-box;
+}
