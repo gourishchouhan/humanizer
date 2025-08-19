@@ -1,5 +1,18 @@
 import { NextResponse } from "next/server";
 
+// Types for Google Generative Language API response
+type GLPart = { text?: string };
+type GLContent = { parts?: GLPart[] };
+type GLCandidate = { content?: GLContent };
+type GLGenerateContentResponse = { candidates?: GLCandidate[] };
+
+type HumanizerFn = (text: string, ...rest: unknown[]) => string | Promise<string>;
+type HumanizerModule = {
+  humanizeAlgorithmic?: HumanizerFn;
+  humanize?: HumanizerFn;
+  default?: HumanizerFn;
+};
+
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
@@ -20,8 +33,7 @@ export async function POST(req: Request) {
 
     const apiVersion = process.env.GEMINI_API_VERSION || "v1";
     const model = process.env.GEMINI_MODEL || "gemini-1.5-flash";
-    const systemPrompt =
-      process.env.SYSTEM_PROMPT || "Humanize the following text.";
+    const systemPrompt = process.env.SYSTEM_PROMPT || "Humanize the following text.";
 
     const url = `https://generativelanguage.googleapis.com/${apiVersion}/models/${model}:generateContent?key=${apiKey}`;
 
@@ -46,21 +58,22 @@ export async function POST(req: Request) {
       );
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as GLGenerateContentResponse;
+    const parts = data?.candidates?.[0]?.content?.parts ?? [];
     const aiOutput =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ||
-      data?.candidates?.[0]?.content?.parts
-        ?.map((p: any) => p?.text)
-        .filter(Boolean)
+      parts[0]?.text?.trim() ||
+      parts
+        .map((p) => p.text)
+        .filter((t): t is string => Boolean(t))
         .join("\n")
-        ?.trim() ||
+        .trim() ||
       "No response generated.";
 
     // Final pass through your algorithm (supports multiple export styles)
     let humanized = aiOutput;
     try {
-      const mod: any = await import("@/lib/humanizer");
-      const algo =
+      const mod = (await import("@/lib/humanizer")) as HumanizerModule;
+      const algo: HumanizerFn | null =
         typeof mod.humanizeAlgorithmic === "function"
           ? mod.humanizeAlgorithmic
           : typeof mod.humanize === "function"
@@ -76,7 +89,7 @@ export async function POST(req: Request) {
         }
       }
     } catch {
-      // If import or algo fails, return raw AI output
+      // fallback to aiOutput
     }
 
     return NextResponse.json({ humanized });

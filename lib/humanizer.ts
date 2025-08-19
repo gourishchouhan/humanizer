@@ -81,7 +81,7 @@ export class TextHumanizer {
     ["very important", ["important", "crucial", "significant"]],
   ]);
 
-  private readonly transitionPhrases = {
+  private readonly transitionPhrases: Record<StyleProfile, string[]> = {
     casual: [
       "So here's the thing:", "Look,", "Honestly,", "You know what?", 
       "Here's what I think:", "To be fair,", "Let me put it this way:",
@@ -110,7 +110,7 @@ export class TextHumanizer {
     ]
   };
 
-  private readonly sentenceEnders = {
+  private readonly sentenceEnders: Partial<Record<StyleProfile, string[]>> = {
     casual: [" — just my take.", " — you feel me?", " — at least that's what I think."],
     storyteller: [" — and that's when everything changed.", " — plot twist!", " — who could have seen that coming?"],
     conversational: [" — make sense?", " — you know what I mean?", " — right?"],
@@ -269,11 +269,13 @@ export class TextHumanizer {
         styled = styled.charAt(0).toUpperCase() + styled.slice(1);
       }
       
-      // Add style-specific sentence endings
-      if (Math.random() < 0.15 * intensity && this.sentenceEnders[options.style]) {
+      // Add style-specific sentence endings (guard missing styles)
+      if (Math.random() < 0.15 * intensity) {
         const enders = this.sentenceEnders[options.style];
-        const ender = enders[Math.floor(Math.random() * enders.length)];
-        styled = styled.replace(/[.!?]$/, ender);
+        if (enders && enders.length) {
+          const ender = enders[Math.floor(Math.random() * enders.length)];
+          styled = styled.replace(/[.!?]$/, ender);
+        }
       }
       
       return styled;
